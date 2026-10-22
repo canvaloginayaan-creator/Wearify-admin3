@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — Wearify</title>
+<link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+
+<div class="admin-shell">
+  <nav class="admin-nav">
+    <div class="admin-logo"><span class="logo-badge">W</span>Wearify <span class="tag">Admin</span></div>
+    <button class="nav-item active" data-tab="overview">Overview</button>
+    <button class="nav-item" data-tab="products">Products</button>
+    <button class="nav-item" data-tab="orders">Orders</button>
+    <button class="nav-item" data-tab="vouchers">Vouchers</button>
+    <button class="nav-item" data-tab="hero">Hero Banner</button>
+    <button class="admin-signout" id="signOutBtn">Log out</button>
+  </nav>
+
+  <main class="admin-main">
+    <div class="admin-header">
+      <h1 id="adminTitle">Overview</h1>
+      <span class="admin-user" id="adminUser"></span>
+    </div>
+
+    <div class="tab-panel" id="panel-overview">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Products</div><div class="stat-value" id="statProducts">0</div></div>
+        <div class="stat-card"><div class="stat-label">Orders</div><div class="stat-value" id="statOrders">0</div></div>
+        <div class="stat-card"><div class="stat-label">Pending orders</div><div class="stat-value" id="statPending">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total sales</div><div class="stat-value" id="statRevenue">PKR 0</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Getting started</h2></div>
+        <div style="padding:22px; font-size:14px; color:var(--grey); line-height:1.7;">
+          Add products from the <strong>Products</strong> tab — each product's <strong>Category</strong> field is what feeds the sidebar filters and homepage tiles on the storefront. Create <strong>Vouchers</strong> for checkout discounts, and track incoming <strong>Orders</strong> here as customers place them.
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-products" style="display:none;">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Products</h2>
+          <button class="btn small accent" id="addProductBtn">Add product</button>
+        </div>
+        <table>
+          <thead><tr><th></th><th>Name</th><th>Category</th><th>Price</th><th></th></tr></thead>
+          <tbody id="productsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-orders" style="display:none;">
+      <div class="panel">
+        <div class="panel-header"><h2>Orders</h2></div>
+        <table>
+          <thead><tr><th>Customer</th><th>Items</th><th>Voucher</th><th>Total</th><th>Status</th><th></th></tr></thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-vouchers" style="display:none;">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Vouchers</h2>
+          <button class="btn small accent" id="addVoucherBtn">Add voucher</button>
+        </div>
+        <table>
+          <thead><tr><th>Code</th><th>Discount</th><th>Status</th><th></th></tr></thead>
+          <tbody id="vouchersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-hero" style="display:none;">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Hero banner slides</h2>
+          <button class="btn small accent" id="addHeroSlideBtn">Add slide</button>
+        </div>
+        <div style="padding:22px; font-size:13.5px; color:var(--grey); border-bottom:1px solid var(--line);">
+          These images auto-slide in the blue banner on the homepage. Add or remove as many as you like — if this list is empty, the homepage falls back to its 4 starter images.
+        </div>
+        <div class="hero-slide-grid" id="heroSlideGrid" style="padding:22px;"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Product modal -->
+<div class="modal-overlay" id="productModalOverlay">
+  <div class="modal-box">
+    <h3 id="productModalTitle">Add product</h3>
+    <form id="productForm">
+      <div class="form-group"><label>Name</label><input type="text" name="name" required></div>
+      <div class="form-group"><label>Category</label><input type="text" name="category" placeholder="e.g. Shirts"></div>
+      <div class="form-group"><label>Price (PKR)</label><input type="number" name="price" min="0" required></div>
+      <div class="form-group"><label>Sizes (comma-separated)</label><input type="text" name="sizes" placeholder="S, M, L, XL"></div>
+      <div class="form-group"><label>Image URL</label><input type="url" name="imageUrl" placeholder="https://..."></div>
+      <div class="form-group"><label>Or upload from your device</label><input type="file" name="imageFile" accept="image/*"></div>
+      <div class="form-group"><label>Description</label><textarea name="description" rows="3"></textarea></div>
+      <p class="form-error" id="productFormError"></p>
+      <div class="form-actions">
+        <button type="button" class="btn outline" id="productModalClose">Cancel</button>
+        <button type="submit" class="btn accent" id="productSaveBtn">Save product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Voucher modal -->
+<div class="modal-overlay" id="voucherModalOverlay">
+  <div class="modal-box">
+    <h3>Add voucher</h3>
+    <form id="voucherForm">
+      <div class="form-group"><label>Code</label><input type="text" name="code" placeholder="e.g. WELCOME10" required></div>
+      <div class="form-group">
+        <label>Type</label>
+        <select name="type">
+          <option value="percent">Percentage off</option>
+          <option value="flat">Flat amount off (PKR)</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Value</label><input type="number" name="value" min="0" required></div>
+      <div class="form-actions">
+        <button type="button" class="btn outline" id="voucherModalClose">Cancel</button>
+        <button type="submit" class="btn accent">Save voucher</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Hero slide modal -->
+<div class="modal-overlay" id="heroSlideModalOverlay">
+  <div class="modal-box">
+    <h3>Add hero slide</h3>
+    <form id="heroSlideForm">
+      <div class="form-group"><label>Image URL</label><input type="url" name="imageUrl" placeholder="https://..."></div>
+      <div class="form-group"><label>Or upload from your device</label><input type="file" name="imageFile" accept="image/*"></div>
+      <p class="form-error" id="heroSlideFormError"></p>
+      <div class="form-actions">
+        <button type="button" class="btn outline" id="heroSlideModalClose">Cancel</button>
+        <button type="submit" class="btn accent" id="heroSlideSaveBtn">Save slide</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="../js/admin.js"></script>
+</body>
+</html>
